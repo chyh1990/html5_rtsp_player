@@ -64,7 +64,7 @@ export class H264Parser {
                 }
                 break;
             case NALU.SEI:
-                // console.log('SEI');
+                // console.log('SEI', unit);
                 break;
             default:
         }
