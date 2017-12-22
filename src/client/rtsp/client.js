@@ -89,6 +89,8 @@ export default class RTSPClient extends BaseClient {
 class AuthError extends Error {
     constructor(msg) {
         super(msg);
+        this.constructor = AuthError
+        this.__proto__   = AuthError.prototype
     }
 }
 
@@ -182,7 +184,8 @@ export class RTSPClientSM extends StateMachine {
     setSource(url) {
         this.reset();
         this.endpoint = url;
-        this.url = url.full;
+        let full = `${url.protocol}://${url.location}${url.urlpath}`;
+        this.url = full
     }
 
     onConnected() {
@@ -294,7 +297,7 @@ export class RTSPClientSM extends StateMachine {
             _params['Authorization'] = this.authenticator(_cmd);
         }
         return this.send(MessageBuilder.build(_cmd, _host, _params, _payload), _cmd).catch((e)=>{
-            if (e instanceof AuthError) {
+            if ((e instanceof AuthError) && !_params['Authorization'] ) {
                 return this.sendRequest(_cmd, _host, _params, _payload);
             } else {
                 throw e;
@@ -340,10 +343,10 @@ export class RTSPClientSM extends StateMachine {
                     this.authenticator = (_method)=>{
                         let ep = this.parent.endpoint;
                         let ha1 = md5(`${ep.user}:${parsedChunks.realm}:${ep.pass}`);
-                        let ha2 = md5(`${_method}:${ep.urlpath}`);
+                        let ha2 = md5(`${_method}:${this.url}`);
                         let response = md5(`${ha1}:${parsedChunks.nonce}:${ha2}`);
                         let tail=''; // TODO: handle other params
-                        return `Digest username="${ep.user}", nonce="${parsedChunks.nonce}", uri="${ep.urlpath}", response="${response}"${tail}`;
+                        return `Digest username="${ep.user}", realm="${parsedChunks.realm}", nonce="${parsedChunks.nonce}", uri="${this.url}", response="${response}"${tail}`;
                     }
                 } else {
                     this.authenticator = ()=>{return `Basic ${btoa(this.parent.endpoint.auth)}`;};

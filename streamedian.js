@@ -31,6 +31,9 @@ window.Streamedian = {
             errorHandler(e) {
                 alert(`Failed to start player: ${e.message}`);
             },
+            metadataHandler(e) {
+                Log.debug(e)
+            },
             queryCredentials(client) {
                 return new Promise((resolve, reject) => {
                     let c = prompt('input credentials in format user:password');

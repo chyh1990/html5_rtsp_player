@@ -41,11 +41,22 @@ export class H264Remuxer extends BaseRemuxer {
 
         this.h264 = new H264Parser(this);
 
+        // check NAL type for buggy camera
         if (params.sps) {
-            this.setSPS(new Uint8Array(params.sps));
+            let arr = new Uint8Array(params.sps);
+            if ((arr[0] & 0x1f) == 7) {
+                this.setSPS(arr);
+            } else {
+                console.log("bad SPS in SDP")
+            }
         }
         if (params.pps) {
-            this.setPPS(new Uint8Array(params.pps));
+            let arr = new Uint8Array(params.pps);
+            if ((arr[0] & 0x1f) == 8) {
+                this.setPPS(arr);
+            } else {
+                console.log("bad PPS in SDP")
+            }
         }
 
         if (this.mp4track.pps && this.mp4track.sps) {

@@ -30,6 +30,7 @@ export class H264Parser {
             }
             this.track.codec  += h;
         }
+        // this.track.codec = 'avc1.64002a'
     }
 
     parsePPS(pps) {
@@ -64,7 +65,7 @@ export class H264Parser {
                 }
                 break;
             case NALU.SEI:
-                // console.log('SEI', unit);
+                console.log('SEI', unit);
                 break;
             default:
         }
